@@ -9,20 +9,27 @@
     <packaging>pom</packaging>
     <version>2019-09-SNAPSHOT</version>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>12</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <com.google.guava.version>28.1-jre</com.google.guava.version>
+    </properties>
+
+    <modules>
+        <module>hw-01-maven</module>
+    </modules>
+
     <dependencyManagement>
         <dependencies>
             <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>28.1-jre</version>
+                <version>${com.google.guava.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <modules>
-        <module>hw-01-maven</module>
-        <module>hw-01-maven</module>
-    </modules>
-
 </project>
