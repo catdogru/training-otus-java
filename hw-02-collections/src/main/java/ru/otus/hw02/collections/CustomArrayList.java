@@ -7,22 +7,30 @@ import java.util.ListIterator;
 
 public class CustomArrayList<E> implements List<E> {
     private Object[] innerArray;
-    private int size;
+    private static final int INITIAL_CAPACITY = 10; //magic digit
 
-    public CustomArrayList(Object[] array) {
+    public CustomArrayList() {
+        innerArray = new Object[INITIAL_CAPACITY];
+    }
+
+    public CustomArrayList(int capacity) {
+        innerArray = new Object[capacity];
+    }
+
+    public CustomArrayList(E[] array) {
         this.innerArray = array;
     }
 
     public int size() {
-        return this.size;
+        return innerArray.length;
     }
 
     public boolean isEmpty() {
-        return size == 0;
+        return size() == 0;
     }
 
     public boolean contains(Object checkedObject) {
-        throw new UnsupportedOperationException();
+        return indexOf(checkedObject) >= 0;
     }
 
     public boolean addAll(Collection<? extends E> addedCollection) {
@@ -73,12 +81,32 @@ public class CustomArrayList<E> implements List<E> {
         throw new UnsupportedOperationException();
     }
 
-    public int indexOf(Object o) {
-        throw new UnsupportedOperationException();
+    /**
+     * @param object may be null
+     * @return first index of element or -1 if element was not found
+     */
+    public int indexOf(Object object) {
+        for (int i = 0; i < size(); i++) {
+            Object currentElement = innerArray[i];
+            if (object == currentElement || object.equals(currentElement)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
-    public int lastIndexOf(Object o) {
-        throw new UnsupportedOperationException();
+    /**
+     * @param object may be null
+     * @return last index of element or -1 if element was not found
+     */
+    public int lastIndexOf(Object object) {
+        for (int i = size() - 1; i == 0; i--) {
+            Object currentElement = innerArray[i];
+            if (object == currentElement || object.equals(innerArray[i])) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public ListIterator<E> listIterator() {
