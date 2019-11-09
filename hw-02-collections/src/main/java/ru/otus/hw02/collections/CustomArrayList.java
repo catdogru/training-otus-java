@@ -1,13 +1,10 @@
 package ru.otus.hw02.collections;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class CustomArrayList<E> implements List<E> {
     private Object[] innerArray;
-    private static final int INITIAL_CAPACITY = 10; //magic digit
+    private static final int INITIAL_CAPACITY = 0; //magic digit
 
     public CustomArrayList() {
         innerArray = new Object[INITIAL_CAPACITY];
@@ -17,7 +14,11 @@ public class CustomArrayList<E> implements List<E> {
         innerArray = new Object[capacity];
     }
 
-    public CustomArrayList(E[] array) {
+    public CustomArrayList(Collection<? extends E> collection) {
+        this.innerArray = collection.toArray();
+    }
+
+    public CustomArrayList(Object[] array) {
         this.innerArray = array;
     }
 
@@ -34,11 +35,31 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public boolean addAll(Collection<? extends E> addedCollection) {
-        throw new UnsupportedOperationException();
+        try {
+            int oldSize = size();
+            int padding = addedCollection.size();
+            int newSize = oldSize + padding;
+            innerArray = Arrays.copyOf(innerArray, newSize);
+            Iterator<? extends E> iterator = addedCollection.iterator();
+            for (int i = oldSize; i < newSize; i++) {
+                innerArray[i] = iterator.next();
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 
     public boolean add(E element) {
-        throw new UnsupportedOperationException();
+        try {
+            int newSize = size() + 1;
+            innerArray = Arrays.copyOf(innerArray, newSize);
+            innerArray[newSize - 1] = element;
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean remove(Object o) {
@@ -65,12 +86,22 @@ public class CustomArrayList<E> implements List<E> {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     public E get(int index) {
-        throw new UnsupportedOperationException();
+        if (index >= size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return (E) innerArray[index];
     }
 
+    @SuppressWarnings("unchecked")
     public E set(int index, E element) {
-        throw new UnsupportedOperationException();
+        if (index >= size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        E oldValue = (E) innerArray[index];
+        innerArray[index] = element;
+        return oldValue;
     }
 
     public void add(int index, E element) {
@@ -110,7 +141,7 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public ListIterator<E> listIterator() {
-        throw new UnsupportedOperationException();
+        return new CustomListIterator();
     }
 
     public ListIterator<E> listIterator(int index) {
@@ -125,11 +156,73 @@ public class CustomArrayList<E> implements List<E> {
         throw new UnsupportedOperationException();
     }
 
-    public Object[] toArray() {
-        throw new UnsupportedOperationException();
+    public E[] toArray() {
+        return (E[]) innerArray;
     }
 
     public <T1> T1[] toArray(T1[] a) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String toString() {
+        return "CustomArrayList{" +
+                "innerArray=" + Arrays.toString(innerArray) +
+                '}';
+    }
+
+    private class CustomIterator implements Iterator<E> {
+        int currentPosition = 0;
+        int lastReturned = -1;
+
+        @Override
+        public boolean hasNext() {
+            return currentPosition < CustomArrayList.this.size();
+        }
+
+        @Override
+        public E next() {
+            E nextElement = (E) innerArray[currentPosition];
+            lastReturned = currentPosition;
+            currentPosition++;
+            return nextElement;
+        }
+    }
+
+    private class CustomListIterator extends CustomIterator implements ListIterator<E> {
+        @Override
+        public boolean hasPrevious() {
+            return false;
+        }
+
+        @Override
+        public E previous() {
+            return null;
+        }
+
+        @Override
+        public int nextIndex() {
+            return 0;
+        }
+
+        @Override
+        public int previousIndex() {
+            return 0;
+        }
+
+        @Override
+        public void remove() {
+
+        }
+
+        @Override
+        public void set(E e) {
+            innerArray[lastReturned] = e;
+        }
+
+        @Override
+        public void add(E e) {
+
+        }
     }
 }
