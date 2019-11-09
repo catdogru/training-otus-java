@@ -62,54 +62,20 @@ public class CustomArrayList<E> implements List<E> {
         }
     }
 
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean addAll(int index, Collection<? extends E> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
-
-    @SuppressWarnings("unchecked")
     public E get(int index) {
         if (index >= size()) {
             throw new IndexOutOfBoundsException();
         }
-        return (E) innerArray[index];
+        return getInnerArrayElement(index);
     }
 
-    @SuppressWarnings("unchecked")
     public E set(int index, E element) {
         if (index >= size()) {
             throw new IndexOutOfBoundsException();
         }
-        E oldValue = (E) innerArray[index];
+        E oldValue = getInnerArrayElement(index);
         innerArray[index] = element;
         return oldValue;
-    }
-
-    public void add(int index, E element) {
-        throw new UnsupportedOperationException();
-    }
-
-    public E remove(int index) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -144,6 +110,47 @@ public class CustomArrayList<E> implements List<E> {
         return new CustomListIterator();
     }
 
+    public E[] toArray() {
+        return (E[]) innerArray;
+    }
+
+    @SuppressWarnings("unchecked")
+    private E getInnerArrayElement(int index) {
+        return (E) innerArray[index];
+    }
+
+    public void add(int index, E element) {
+        throw new UnsupportedOperationException();
+    }
+
+    public E remove(int index) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean containsAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean addAll(int index, Collection<? extends E> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
     public ListIterator<E> listIterator(int index) {
         throw new UnsupportedOperationException();
     }
@@ -154,10 +161,6 @@ public class CustomArrayList<E> implements List<E> {
 
     public Iterator<E> iterator() {
         throw new UnsupportedOperationException();
-    }
-
-    public E[] toArray() {
-        return (E[]) innerArray;
     }
 
     public <T1> T1[] toArray(T1[] a) {
@@ -182,47 +185,46 @@ public class CustomArrayList<E> implements List<E> {
 
         @Override
         public E next() {
-            E nextElement = (E) innerArray[currentPosition];
             lastReturned = currentPosition;
             currentPosition++;
-            return nextElement;
+            return CustomArrayList.this.getInnerArrayElement(lastReturned);
         }
     }
 
     private class CustomListIterator extends CustomIterator implements ListIterator<E> {
-        @Override
-        public boolean hasPrevious() {
-            return false;
-        }
-
-        @Override
-        public E previous() {
-            return null;
-        }
-
-        @Override
-        public int nextIndex() {
-            return 0;
-        }
-
-        @Override
-        public int previousIndex() {
-            return 0;
-        }
-
-        @Override
-        public void remove() {
-
-        }
-
         @Override
         public void set(E e) {
             innerArray[lastReturned] = e;
         }
 
         @Override
-        public void add(E e) {
+        public boolean hasPrevious() {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public E previous() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int nextIndex() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int previousIndex() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void add(E e) {
+            throw new UnsupportedOperationException();
         }
     }
 }
