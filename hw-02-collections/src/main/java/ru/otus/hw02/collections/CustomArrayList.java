@@ -4,10 +4,11 @@ import java.util.*;
 
 public class CustomArrayList<E> implements List<E> {
     private Object[] innerArray;
-    private static final int INITIAL_CAPACITY = 0; //magic digit
+    private int elementCount;
+    private static final int CAPACITY = 5; //magic digit
 
     public CustomArrayList() {
-        innerArray = new Object[INITIAL_CAPACITY];
+        innerArray = new Object[CAPACITY];
     }
 
     public CustomArrayList(int capacity) {
@@ -23,7 +24,7 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public int size() {
-        return innerArray.length;
+        return elementCount;
     }
 
     public boolean isEmpty() {
@@ -36,26 +37,25 @@ public class CustomArrayList<E> implements List<E> {
 
     public boolean addAll(Collection<? extends E> addedCollection) {
         try {
-            int oldSize = size();
-            int padding = addedCollection.size();
-            int newSize = oldSize + padding;
-            innerArray = Arrays.copyOf(innerArray, newSize);
-            Iterator<? extends E> iterator = addedCollection.iterator();
-            for (int i = oldSize; i < newSize; i++) {
-                innerArray[i] = iterator.next();
+            int newInnerArrayLength = innerArray.length + addedCollection.size();
+            innerArray = Arrays.copyOf(innerArray, newInnerArrayLength);
+            for (E e : addedCollection) {
+                innerArray[elementCount] = e;
+                elementCount++;
             }
             return true;
         } catch (Exception e) {
             return false;
         }
-
     }
 
     public boolean add(E element) {
         try {
-            int newSize = size() + 1;
-            innerArray = Arrays.copyOf(innerArray, newSize);
-            innerArray[newSize - 1] = element;
+            if (elementCount == innerArray.length) {
+                innerArray = Arrays.copyOf(innerArray, innerArray.length + CAPACITY);
+            }
+            innerArray[elementCount] = element;
+            elementCount++;
             return true;
         } catch (Exception e) {
             return false;
@@ -63,19 +63,22 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public E get(int index) {
-        if (index >= size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkIndex(index);
         return getInnerArrayElement(index);
     }
 
     public E set(int index, E element) {
-        if (index >= size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkIndex(index);
         E oldValue = getInnerArrayElement(index);
         innerArray[index] = element;
         return oldValue;
+    }
+
+    private void checkIndex(int index) {
+        if (index >= 0 && index < size()) {
+            return;
+        }
+        throw new IndexOutOfBoundsException();
     }
 
     /**
@@ -185,6 +188,7 @@ public class CustomArrayList<E> implements List<E> {
 
         @Override
         public E next() {
+            CustomArrayList.this.checkIndex(currentPosition);
             lastReturned = currentPosition;
             currentPosition++;
             return CustomArrayList.this.getInnerArrayElement(lastReturned);
