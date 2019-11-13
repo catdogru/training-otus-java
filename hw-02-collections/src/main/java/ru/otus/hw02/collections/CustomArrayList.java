@@ -5,7 +5,7 @@ import java.util.*;
 public class CustomArrayList<E> implements List<E> {
     private Object[] innerArray;
     private int elementCount;
-    private static final int CAPACITY = 5; //magic digit
+    private static final int CAPACITY = 10; //magic digit
 
     public CustomArrayList() {
         innerArray = new Object[CAPACITY];
@@ -50,16 +50,12 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public boolean add(E element) {
-        try {
-            if (elementCount == innerArray.length) {
-                innerArray = Arrays.copyOf(innerArray, innerArray.length + CAPACITY);
-            }
-            innerArray[elementCount] = element;
-            elementCount++;
-            return true;
-        } catch (Exception e) {
-            return false;
+        if (elementCount == innerArray.length) {
+            innerArray = Arrays.copyOf(innerArray, innerArray.length + CAPACITY);
         }
+        innerArray[elementCount] = element;
+        elementCount++;
+        return true;
     }
 
     public E get(int index) {
