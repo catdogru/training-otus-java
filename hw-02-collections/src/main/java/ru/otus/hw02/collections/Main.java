@@ -37,7 +37,7 @@ public class Main {
     }
 
     private static void fillListRandomly(List<Integer> list) {
-        int ARRAY_LIST_SIZE = 25;
+        int ARRAY_LIST_SIZE = 5;
 
         Random random = new Random();
         for (int i = 0; i < ARRAY_LIST_SIZE; i++) {

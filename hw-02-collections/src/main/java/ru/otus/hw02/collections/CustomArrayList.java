@@ -110,7 +110,7 @@ public class CustomArrayList<E> implements List<E> {
     }
 
     public E[] toArray() {
-        return (E[]) innerArray;
+        return (E[]) Arrays.copyOfRange(innerArray, 0, size());
     }
 
     @SuppressWarnings("unchecked")
@@ -169,7 +169,7 @@ public class CustomArrayList<E> implements List<E> {
     @Override
     public String toString() {
         return "CustomArrayList{" +
-                "innerArray=" + Arrays.toString(innerArray) +
+                "innerArray=" + Arrays.toString(toArray()) +
                 '}';
     }
 
