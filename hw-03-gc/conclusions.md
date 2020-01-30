@@ -1,6 +1,7 @@
 Статистика:
+
 ||SerialGC|ParallelGC|ConcMarkSweepGC|G1GC|
-|-|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|
 |total time (sec)|289|278|297|279|
 |minor count|4|3|10|24|
 |minor total duration (ms)|172|166|287|574|
