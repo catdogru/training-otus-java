@@ -1,6 +1,4 @@
 import annotation.Log;
-import calculator.CalculatorImpl;
-import calculator.CalculatorInterface;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -11,33 +9,35 @@ import java.util.List;
 import java.util.StringJoiner;
 
 public class IoC {
-    public static CalculatorInterface createCalculator() {
-        InvocationHandler handler = new CalculatorInvocationHandler(new CalculatorImpl());
-        return (CalculatorInterface) Proxy.newProxyInstance(IoC.class.getClassLoader(), new Class<?>[]{CalculatorInterface.class}, handler);
+    public static <I, P extends I> I createProxy(P proxiedObject) {
+        InvocationHandler handler = new LoggingInvocationHandler(proxiedObject, Log.class);
+        return (I) Proxy.newProxyInstance(IoC.class.getClassLoader(), proxiedObject.getClass().getInterfaces(), handler);
     }
 
-    static class CalculatorInvocationHandler implements InvocationHandler {
-        private final CalculatorInterface calculator;
+    static class LoggingInvocationHandler implements InvocationHandler {
+        private final Object proxiedClass;
+        private List<Method> annotatedMethodList;
 
-        CalculatorInvocationHandler(CalculatorInterface calculator) {
-            this.calculator = calculator;
+        LoggingInvocationHandler(Object proxiedClass, Class<? extends Annotation> annotation) {
+            this.proxiedClass = proxiedClass;
+            this.annotatedMethodList = getAnnotatedMethods(annotation);
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            for (Method annotatedMethod : getAnnotatedMethods(Log.class)) {
+            for (Method annotatedMethod : annotatedMethodList) {
                 if (!annotatedMethod.getName().equals(method.getName())) {
                     continue;
                 }
                 doLogging(method, args);
                 break;
             }
-            return method.invoke(calculator, args);
+            return method.invoke(proxiedClass, args);
         }
 
         private List<Method> getAnnotatedMethods(Class<? extends Annotation> annotation) {
-            List<Method> annotatedMethodList = new ArrayList<>();
-            for (Method method : calculator.getClass().getMethods()) {
+            annotatedMethodList = new ArrayList<>();
+            for (Method method : proxiedClass.getClass().getMethods()) {
                 if (!method.isAnnotationPresent(annotation)) {
                     continue;
                 }
