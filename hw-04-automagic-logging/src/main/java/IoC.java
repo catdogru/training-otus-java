@@ -4,9 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class IoC {
     public static <I, P extends I> I createProxy(P proxiedObject) {
@@ -16,34 +14,30 @@ public class IoC {
 
     static class LoggingInvocationHandler implements InvocationHandler {
         private final Object proxiedClass;
-        private List<Method> annotatedMethodList;
+        private Set<Method> annotatedMethodSet;
 
         LoggingInvocationHandler(Object proxiedClass, Class<? extends Annotation> annotation) {
             this.proxiedClass = proxiedClass;
-            this.annotatedMethodList = getAnnotatedMethods(annotation);
+            this.annotatedMethodSet = getAnnotatedMethods(annotation);
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            for (Method annotatedMethod : annotatedMethodList) {
-                if (!annotatedMethod.getName().equals(method.getName())) {
-                    continue;
-                }
+            if (annotatedMethodSet.contains(method)) {
                 doLogging(method, args);
-                break;
             }
             return method.invoke(proxiedClass, args);
         }
 
-        private List<Method> getAnnotatedMethods(Class<? extends Annotation> annotation) {
-            annotatedMethodList = new ArrayList<>();
+        private Set<Method> getAnnotatedMethods(Class<? extends Annotation> annotation) {
+            annotatedMethodSet = new HashSet<>();
             for (Method method : proxiedClass.getClass().getMethods()) {
                 if (!method.isAnnotationPresent(annotation)) {
                     continue;
                 }
-                annotatedMethodList.add(method);
+                annotatedMethodSet.add(method);
             }
-            return annotatedMethodList;
+            return annotatedMethodSet;
         }
 
         private static void doLogging(Method method, Object[] args) {
