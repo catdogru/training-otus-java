@@ -8,6 +8,7 @@ public class AutomagicLoggingDemo {
         CalculatorInterface calculator = IoC.<CalculatorInterface, CalculatorImpl>
                 createProxy(new CalculatorImpl());
         calculator.calculate(100500);
+        calculator.calculate(100500, 200500);
         calculator.nonAnnotatedCalculate(200500);
 
         AnotherCalculatorInterface anotherCalculator = IoC.<AnotherCalculatorInterface, AnotherCalculatorImpl>

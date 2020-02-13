@@ -1,4 +1,5 @@
 import annotation.Log;
+import calculator.MethodWrapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -14,7 +15,7 @@ public class IoC {
 
     static class LoggingInvocationHandler implements InvocationHandler {
         private final Object proxiedClass;
-        private Set<Method> annotatedMethodSet;
+        private Set<MethodWrapper> annotatedMethodSet;
 
         LoggingInvocationHandler(Object proxiedClass, Class<? extends Annotation> annotation) {
             this.proxiedClass = proxiedClass;
@@ -23,19 +24,19 @@ public class IoC {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (annotatedMethodSet.contains(method)) {
+            if (annotatedMethodSet.contains(new MethodWrapper(method))) {
                 doLogging(method, args);
             }
             return method.invoke(proxiedClass, args);
         }
 
-        private Set<Method> getAnnotatedMethods(Class<? extends Annotation> annotation) {
+        private Set<MethodWrapper> getAnnotatedMethods(Class<? extends Annotation> annotation) {
             annotatedMethodSet = new HashSet<>();
             for (Method method : proxiedClass.getClass().getMethods()) {
                 if (!method.isAnnotationPresent(annotation)) {
                     continue;
                 }
-                annotatedMethodSet.add(method);
+                annotatedMethodSet.add(new MethodWrapper(method));
             }
             return annotatedMethodSet;
         }

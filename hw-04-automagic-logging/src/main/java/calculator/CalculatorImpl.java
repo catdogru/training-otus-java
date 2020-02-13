@@ -10,6 +10,11 @@ public class CalculatorImpl implements CalculatorInterface {
     }
 
     @Override
+    public void calculate(int arg0, int arg1) {
+        System.out.println("вызов перегруженного метода без аннотации");
+    }
+
+    @Override
     public void nonAnnotatedCalculate(int arg) {
         System.out.println("вызов метода без аннотации");
     }
