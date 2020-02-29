@@ -18,15 +18,15 @@ public class TestLauncher {
     public void runTests(TestClass testClass) throws ClassNotFoundException {
         Class clazz = Class.forName(testClass.getClass().getName());
         filteredMethodMap = AnnotatedMethodFilter.getFilteredMethodMap(clazz, annotationList);
-        runTestMethods(filteredMethodMap.get(Test.class), stats);
+        runTestMethods(filteredMethodMap.get(Test.class));
         System.out.println(stats.toString());
     }
 
-    private void runTestMethods(Set<Method> methodSet, TestStats stats) {
+    private void runTestMethods(Set<Method> methodSet) {
         for (Method method : methodSet) {
             try {
                 safeInvokeMethods(filteredMethodMap.get(Before.class));
-                method.invoke(method.getParameterTypes());
+                method.invoke(method.getParameters());
                 stats.handleTestResult("SUCCESS");
             } catch (Exception e) {
                 stats.handleTestResult("FAIL");
@@ -39,19 +39,21 @@ public class TestLauncher {
     private void safeInvokeMethods(Set<Method> methodSet) {
         for (Method method : methodSet) {
             try {
-                method.invoke(method.getParameterTypes());
+                method.invoke(method.getParameters());
             } catch (Exception ignored) {
             }
         }
     }
 
-    private class TestStats {
+    private static class TestStats {
         private int failedCount;
         private int successCount;
 
         void handleTestResult(String testResult) {
-            if ("SUCCESS".equals(testResult)) successCount++;
-            if ("FAIL".equals(testResult)) failedCount++;
+            switch (testResult) {
+                case "SUCCESS" : successCount++; break;
+                case "FAIL": failedCount++;
+            }
         }
 
         @Override
