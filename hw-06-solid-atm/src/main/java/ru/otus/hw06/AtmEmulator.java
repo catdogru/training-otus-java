@@ -1,29 +1,61 @@
 package ru.otus.hw06;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
+import ru.otus.hw06.constants.CellType;
 
 public class AtmEmulator {
-    private Multiset<BanknoteType> storage = HashMultiset.create();
-
-    public void put(BanknoteType banknoteType) {
-        storage.add(banknoteType);
-    }
-
-    public void put(BanknoteType banknoteType, int count) {
-        storage.add(banknoteType, count);
-    }
-
-    public void getMoney() {
-
-    }
+    private CellContainer innerStorage = new CellContainer();
+    private CellContainer outCash = new CellContainer();
 
     public int getBalance() {
-        int balance = 0;
-        
-        for (BanknoteType banknoteType : storage) {
-            balance += banknoteType.getIntValue() * storage.count(banknoteType);
+        return innerStorage.getAllSum();
+    }
+
+    public void put(CellType cellType, int count) {
+        innerStorage.add(cellType, count);
+    }
+
+    public void tryToGetRequiredSum(int reqSum) {
+        if (reqSum == 0) return;
+
+        for (CellType cellType : innerStorage.getCellTypeSet()) {
+            if (cellType.getIntValue() > reqSum) {
+                continue;
+            }
+
+            if (cellType.getIntValue() == reqSum) {
+                innerStorage.remove(cellType);
+                outCash.add(cellType);
+                break;
+            }
+
+            innerStorage.remove(cellType);
+            outCash.add(cellType);
+            int ostatok = reqSum - cellType.getIntValue();
+            tryToGetRequiredSum(ostatok);
+            break;
         }
-        return balance;
+    }
+
+    public Object getMoney(int requiredSum) {
+        int currentBalance = getBalance();
+        if (requiredSum == 0) {
+            throw new RuntimeException("Некорректный ввод суммы");
+        }
+        if (requiredSum > currentBalance) {
+            throw new RuntimeException("Запрошенная сумма превышает остаток в банкомате, остаток: " + currentBalance);
+        }
+
+        tryToGetRequiredSum(requiredSum);
+
+        if (outCash.getAllSum() < requiredSum) {
+            rollback();
+            throw new RuntimeException("Запрошенная сумма не может быть выдана, доступные номиналы: " + innerStorage.getCellTypeSet());
+        }
+        return outCash;
+    }
+
+    private void rollback() {
+        innerStorage.addAll(outCash.getCellTypeSet());
+        outCash.clear();
     }
 }
