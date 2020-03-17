@@ -1,61 +1,77 @@
 package ru.otus.hw06;
 
-import ru.otus.hw06.constants.CellType;
+import ru.otus.hw06.constants.Nominal;
+import ru.otus.hw06.exceptions.*;
+
+import static java.util.Collections.min;
+import static java.util.Comparator.reverseOrder;
+import static java.util.stream.Collectors.toList;
 
 public class AtmEmulator {
-    private CellContainer innerStorage = new CellContainer();
-    private CellContainer outCash = new CellContainer();
+    private CassetteContainer innerContainer = new CassetteContainer();
+    private CassetteContainer cashOutContainer = new CassetteContainer();
 
     public int getBalance() {
-        return innerStorage.getAllSum();
+        return innerContainer.getTotalSum();
     }
 
-    public void put(CellType cellType, int count) {
-        innerStorage.add(cellType, count);
+    public void put(Nominal nominal, int count) {
+        innerContainer.add(nominal, count);
     }
 
-    public void tryToGetRequiredSum(int reqSum) {
-        if (reqSum == 0) return;
+    public CassetteContainer getMoney(int requiredSum) throws AtmException {
+        checkSum(requiredSum);
+        tryToGetRequiredSum(requiredSum);
+        if (cashOutContainer.getTotalSum() < requiredSum) {
+            rollback();
+            throw new NotEnoughBanknoteException();
+        }
+        return cashOutContainer;
+    }
 
-        for (CellType cellType : innerStorage.getCellTypeSet()) {
-            if (cellType.getIntValue() > reqSum) {
+    private void tryToGetRequiredSum(int reqSum) {
+        /* start from larger nominal values */
+        for (Nominal nominal : innerContainer.getAvailableNominals()
+                .stream()
+                .sorted(reverseOrder())
+                .collect(toList())) {
+
+            if (nominal.getIntValue() > reqSum) {
                 continue;
             }
 
-            if (cellType.getIntValue() == reqSum) {
-                innerStorage.remove(cellType);
-                outCash.add(cellType);
+            if (nominal.getIntValue() == reqSum) {
+                innerContainer.remove(nominal);
+                cashOutContainer.add(nominal);
                 break;
             }
 
-            innerStorage.remove(cellType);
-            outCash.add(cellType);
-            int ostatok = reqSum - cellType.getIntValue();
-            tryToGetRequiredSum(ostatok);
+            innerContainer.remove(nominal);
+            cashOutContainer.add(nominal);
+            int delta = reqSum - nominal.getIntValue();
+            tryToGetRequiredSum(delta);
             break;
         }
     }
 
-    public Object getMoney(int requiredSum) {
-        int currentBalance = getBalance();
+    private void checkSum(int requiredSum) throws AtmException {
         if (requiredSum == 0) {
-            throw new RuntimeException("Некорректный ввод суммы");
+            throw new EmptyRequiredSumException();
         }
+
+        int currentBalance = getBalance();
         if (requiredSum > currentBalance) {
-            throw new RuntimeException("Запрошенная сумма превышает остаток в банкомате, остаток: " + currentBalance);
+            throw new NotEnoughMoneyException(currentBalance);
         }
 
-        tryToGetRequiredSum(requiredSum);
-
-        if (outCash.getAllSum() < requiredSum) {
-            rollback();
-            throw new RuntimeException("Запрошенная сумма не может быть выдана, доступные номиналы: " + innerStorage.getCellTypeSet());
+        int minNominal = min(innerContainer.getAvailableNominals()).getIntValue();
+        if (requiredSum % minNominal != 0) {
+            throw new IncorrectMinNominalException(minNominal);
         }
-        return outCash;
     }
 
     private void rollback() {
-        innerStorage.addAll(outCash.getCellTypeSet());
-        outCash.clear();
+        innerContainer.addAll(cashOutContainer);
+        cashOutContainer.clear();
     }
 }
