@@ -1,27 +1,25 @@
 package ru.otus.hw06.atm;
 
-import ru.otus.hw06.cassete.Cassette;
-import ru.otus.hw06.cassete.CassetteImpl;
+import ru.otus.hw06.cassette.Cassette;
+import ru.otus.hw06.cassette.CassetteImpl;
 import ru.otus.hw06.constants.Nominal;
-import ru.otus.hw06.exceptions.*;
+import ru.otus.hw06.exceptions.atm.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.min;
 import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 
 public class AtmEmulatorImpl implements AtmEmulator {
     private Map<Nominal, Cassette> cassettes = new HashMap<>();
-    private List<Nominal> cashOut = new ArrayList<>();
 
     public AtmEmulatorImpl() {
         initialize();
     }
 
     @Override
-    public void put(List<Nominal> money) {
+    public void putMoney(List<Nominal> money) {
         money.forEach(nominal -> cassettes.get(nominal).addBanknote());
     }
 
@@ -36,41 +34,33 @@ public class AtmEmulatorImpl implements AtmEmulator {
     @Override
     public List<Nominal> getMoney(int requiredSum) {
         checkRequiredSum(requiredSum);
-        tryToGetRequiredSum(requiredSum);
-
-        if (cashOut.stream().mapToInt(Nominal::getIntValue).sum() < requiredSum) {
-            rollback();
-            throw new NotEnoughBanknoteException();
-        }
-
-        return cashOut;
+        List<Nominal> banknoteCombination = calculateBanknoteCombination(requiredSum);
+        getMoneyFromCassettes(banknoteCombination);
+        return banknoteCombination;
     }
 
-    private void tryToGetRequiredSum(int requiredSum) {
+    private void getMoneyFromCassettes(List<Nominal> money) {
+        money.forEach(nominal -> cassettes.get(nominal).getBanknote());
+    }
+
+    private List<Nominal> calculateBanknoteCombination(int requiredSum) {
+        List<Nominal> banknoteCombination = new ArrayList<>();
         /* start from larger nominal values */
         for (Nominal nominal : cassettes.keySet()
                 .stream()
                 .sorted(reverseOrder())
                 .collect(toList())) {
-
-            if (nominal.getIntValue() > requiredSum) {
+            int banknoteCount =  Math.min(cassettes.get(nominal).getBanknoteCount(), requiredSum / nominal.getIntValue());
+            if (banknoteCount == 0) {
                 continue;
             }
-
-            if (nominal.getIntValue() == requiredSum) {
-                if (cassettes.get(nominal).getBanknote()) {
-                    cashOut.add(nominal);
-                    break;
-                }
-            }
-
-            if (cassettes.get(nominal).getBanknote()) {
-                cashOut.add(nominal);
-                int delta = requiredSum - nominal.getIntValue();
-                tryToGetRequiredSum(delta);
-                break;
+            requiredSum = requiredSum - (nominal.getIntValue() * banknoteCount);
+            for (int i = 0; i < banknoteCount; i++) {
+                banknoteCombination.add(nominal);
             }
         }
+        if (requiredSum > 0) throw new NotEnoughBanknoteException();
+        return banknoteCombination;
     }
 
     private void checkRequiredSum(int requiredSum) throws AtmException {
@@ -83,15 +73,10 @@ public class AtmEmulatorImpl implements AtmEmulator {
             throw new NotEnoughMoneyException(currentBalance);
         }
 
-        int minNominal = min(cassettes.keySet()).getIntValue();
+        int minNominal = Collections.min(cassettes.keySet()).getIntValue();
         if (requiredSum % minNominal != 0) {
             throw new IncorrectMinNominalException(minNominal);
         }
-    }
-
-    private void rollback() {
-        cashOut.forEach(nominal -> cassettes.get(nominal).addBanknote());
-        cashOut.clear();
     }
 
     private void initialize() {

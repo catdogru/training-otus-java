@@ -7,7 +7,7 @@ import java.util.List;
 public interface AtmEmulator {
     int getBalance();
 
-    void put(List<Nominal> money);
+    void putMoney(List<Nominal> money);
 
     List<Nominal> getMoney(int requiredSum);
 }

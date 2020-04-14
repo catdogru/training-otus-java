@@ -1,4 +1,4 @@
-package ru.otus.hw06.exceptions;
+package ru.otus.hw06.exceptions.atm;
 
 public class NotEnoughMoneyException extends AtmException {
     private static final String MESSAGE = "Не хватает золота, милорд. Остаток: %s";

@@ -1,6 +1,7 @@
-package ru.otus.hw06.cassete;
+package ru.otus.hw06.cassette;
 
 import ru.otus.hw06.constants.Nominal;
+import ru.otus.hw06.exceptions.cassette.OutOfBanknoteException;
 
 public class CassetteImpl implements Cassette {
     private Nominal nominal;
@@ -16,16 +17,20 @@ public class CassetteImpl implements Cassette {
     }
 
     @Override
-    public boolean getBanknote() {
+    public void getBanknote() {
         if (count == 0) {
-            return false;
+            throw new OutOfBanknoteException();
         }
         count--;
-        return true;
     }
 
     @Override
     public int getCassetteSum() {
         return nominal.getIntValue() * count;
+    }
+
+    @Override
+    public int getBanknoteCount() {
+        return count;
     }
 }
