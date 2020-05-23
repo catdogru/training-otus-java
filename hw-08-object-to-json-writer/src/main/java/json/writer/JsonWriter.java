@@ -6,8 +6,22 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
 
-public abstract class JsonWriter {
-    public static JsonObject buildJsonObject(Object object) throws IllegalAccessException {
+import static json.writer.FieldTypeEnum.parseFieldType;
+
+public final class JsonWriter {
+    private JsonWriter() {}
+
+    public static String toJsonString(Object object) throws IllegalAccessException {
+        if (object == null) return JsonValue.NULL.toString();
+
+        if (parseFieldType(object.getClass()) == FieldTypeEnum.OBJECT) {
+            return buildJsonObject(object).toString();
+        }
+
+        return getJsonValue(object).toString();
+    }
+
+    private static JsonObject buildJsonObject(Object object) throws IllegalAccessException {
         JsonObjectBuilder jsonObject = Json.createObjectBuilder();
         Field[] fields = object.getClass().getDeclaredFields();
 
@@ -17,16 +31,15 @@ public abstract class JsonWriter {
             String fieldName = field.getName();
             Object fieldValue = field.get(object);
 
-            if (fieldValue == null) continue;
-
             jsonObject.add(fieldName, getJsonValue(fieldValue));
         }
         return jsonObject.build();
     }
 
     private static JsonValue getJsonValue(Object fieldValue) throws IllegalAccessException {
+        if (fieldValue == null) return JsonValue.NULL;
         Class<?> fieldType = fieldValue.getClass();
-        switch (FieldTypeEnum.parseFieldType(fieldType)) {
+        switch (parseFieldType(fieldType)) {
             case BOOLEAN:
                 return (boolean) fieldValue ? JsonValue.TRUE : JsonValue.FALSE;
             case BYTE:
