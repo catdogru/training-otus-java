@@ -3,6 +3,7 @@ package json.writer;
 import javax.json.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public final class JsonWriter {
         Field[] fields = object.getClass().getDeclaredFields();
 
         for (Field field : fields) {
+            if (isNonSerializableField(field)) continue;
+
             field.setAccessible(true);
 
             String fieldName = field.getName();
@@ -87,5 +90,11 @@ public final class JsonWriter {
             mapBuilder.add(entry.getKey().toString(), getJsonValue(entry.getValue()));
         }
         return mapBuilder.build();
+    }
+
+    private static boolean isNonSerializableField(Field field) {
+        int fieldModifiers = field.getModifiers();
+        return Modifier.isTransient(fieldModifiers)
+                || (Modifier.isFinal(fieldModifiers) && Modifier.isStatic(fieldModifiers));
     }
 }

@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import json.writer.JsonWriter;
 import object.examples.NonPrimitiveFieldsObject;
+import object.examples.NonSerializableFieldsObject;
 import object.examples.PrimitiveFieldsObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,12 +16,14 @@ public class JsonWriterTest {
     private Gson gson;
     private PrimitiveFieldsObject testedPrimitiveFieldsObject;
     private NonPrimitiveFieldsObject testedNonPrimitiveFieldsObject;
+    private NonSerializableFieldsObject testedNonSerializableFieldsObject;
 
     @Before
     public void before() {
         gson = new GsonBuilder().serializeNulls().create();
         testedPrimitiveFieldsObject = new PrimitiveFieldsObject();
         testedNonPrimitiveFieldsObject = new NonPrimitiveFieldsObject();
+        testedNonSerializableFieldsObject = new NonSerializableFieldsObject();
     }
 
     @Test
@@ -47,4 +50,8 @@ public class JsonWriterTest {
         assertEquals(gson.toJson(Collections.singletonList(7)), JsonWriter.toJsonString(Collections.singletonList(7)));
     }
 
+    @Test
+    public void nonSerializableFieldToJsonTest() throws IllegalAccessException {
+        assertEquals(gson.toJson(testedNonSerializableFieldsObject), JsonWriter.toJsonString(testedNonSerializableFieldsObject));
+    }
 }
