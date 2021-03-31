@@ -16,7 +16,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <com.google.guava.version>28.1-jre</com.google.guava.version>
+        <com.google.guava.version>29.0-jre</com.google.guava.version>
         <junit.version>4.13</junit.version>
     </properties>
 
